@@ -1,0 +1,6 @@
+{
+  "name": "Simulasi Iklim IPAS SD Kelas 4 - Efek Rumah Kaca & Bumi Kita",
+  "description": "Aplikasi web simulasi interaktif edukatif IPAS Kurikulum Merdeka Bab 4: Iklim dan Perubahannya untuk siswa SD Kelas 4 dengan visualisasi atmosfer Canvas 2D, kontrol emisi CO2 & pohon, termometer digital, dan kuis refleksi.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

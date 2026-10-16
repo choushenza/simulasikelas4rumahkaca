@@ -1,0 +1,2020 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulasi Iklim IPAS SD Kelas 4 - Efek Rumah Kaca & Bumi Kita</title>
+  <meta name="description" content="Aplikasi web simulasi interaktif edukatif IPAS Kurikulum Merdeka Bab 4: Iklim dan Perubahannya untuk siswa SD Kelas 4 dengan visualisasi atmosfer Canvas 2D, kontrol emisi CO2 & pohon, termometer digital, dan kuis refleksi." />
+  <meta property="og:title" content="Simulasi Iklim IPAS SD Kelas 4 - Efek Rumah Kaca & Bumi Kita" />
+  <meta property="og:description" content="Aplikasi web simulasi interaktif edukatif IPAS Kurikulum Merdeka Bab 4: Iklim dan Perubahannya untuk siswa SD Kelas 4 dengan visualisasi atmosfer Canvas 2D, kontrol emisi CO2 & pohon, termometer digital, dan kuis refleksi." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            earth: {
+              blue: '#2563eb',
+              green: '#16a34a',
+              sky: '#38bdf8',
+              warm: '#f97316',
+              hot: '#dc2626'
+            }
+          },
+          fontFamily: {
+            heading: ['Fredoka', 'system-ui', 'sans-serif'],
+            body: ['Nunito', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts: Fredoka & Nunito -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    h1, h2, h3, h4, .font-fun {
+      font-family: 'Fredoka', cursive, sans-serif;
+    }
+    /* Custom Slider Track and Thumb */
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      background: transparent;
+    }
+    input[type=range]:focus {
+      outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 26px;
+      width: 26px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 3px solid #2563eb;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      margin-top: -9px;
+      transition: transform 0.1s ease, border-color 0.2s ease;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 10px;
+      cursor: pointer;
+      border-radius: 9999px;
+    }
+    .slider-co2::-webkit-slider-runnable-track {
+      background: linear-gradient(to right, #93c5fd, #fbbf24, #ef4444);
+    }
+    .slider-trees::-webkit-slider-runnable-track {
+      background: linear-gradient(to right, #fde68a, #86efac, #15803d);
+    }
+    @keyframes floating {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    .floating-anim {
+      animation: floating 3s ease-in-out infinite;
+    }
+    /* Tab indicator transitions */
+    .tab-btn.active {
+      background-color: #0284c7;
+      color: #ffffff;
+      box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.3);
+    }
+  </style>
+</head>
+
+<body class="bg-gradient-to-br from-sky-100 via-amber-50/40 to-emerald-100 min-h-screen text-slate-800 flex flex-col selection:bg-sky-200">
+
+  <!-- ================= HEADER UTAMA ================= -->
+  <header class="bg-white/95 backdrop-blur-md border-b-4 border-sky-400 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
+      <!-- Title & Branding -->
+      <div class="flex items-center space-x-3">
+        <div class="w-11 h-11 bg-sky-500 rounded-2xl flex items-center justify-center text-2xl shadow-md border-2 border-white floating-anim">
+          🌍
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 font-fun flex items-center gap-1.5">
+              Petualangan Iklim Cilik
+              <span class="text-xs bg-amber-400 text-amber-950 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Bab 4 IPAS SD 4</span>
+            </h1>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-600 font-medium">
+            Kurikulum Merdeka: <span class="font-semibold text-sky-700">"Iklim dan Perubahannya"</span> • Siap Hosting & Sumber NotebookLM
+          </p>
+        </div>
+      </div>
+
+      <!-- Quick Action Badges & Buttons -->
+      <div class="flex items-center flex-wrap gap-2">
+        <!-- Audio Narasi Suara Guru -->
+        <button id="btnTtsToggle" title="Nyalakan/Matikan Narasi Suara Guru" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 text-xs sm:text-sm font-bold border border-amber-300 transition shadow-sm active:scale-95">
+          <span id="ttsIcon">🔊</span>
+          <span id="ttsLabel">Suara Guru</span>
+        </button>
+
+        <!-- Sound FX Synth Toggle -->
+        <button id="btnSfxToggle" title="Nyalakan/Matikan Efek Suara" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-900 text-xs sm:text-sm font-bold border border-sky-300 transition shadow-sm active:scale-95">
+          <span id="sfxIcon">🎵</span>
+          <span>Efek Bunyi</span>
+        </button>
+
+        <!-- Salin Teks untuk NotebookLM -->
+        <button id="btnCopyNotebookLm" title="Salin seluruh teks materi kurikulum IPAS Bab 4 ke clipboard untuk ditempel di NotebookLM" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm font-bold shadow-md transition active:scale-95">
+          <span>📋</span>
+          <span class="hidden sm:inline">Salin ke NotebookLM</span>
+          <span class="sm:hidden">NotebookLM</span>
+        </button>
+
+        <!-- Unduh Single-File HTML Mandiri -->
+        <button id="btnDownloadHtml" title="Unduh file HTML utuh ini untuk disimpan atau dihosting secara gratis" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-md transition active:scale-95">
+          <span>💾</span>
+          <span class="hidden sm:inline">Unduh index.html</span>
+          <span class="sm:hidden">Unduh</span>
+        </button>
+
+        <!-- Bantuan -->
+        <button id="btnHelpModal" title="Petunjuk Cara Bermain" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center border border-slate-300 text-sm shadow-sm transition active:scale-95">
+          ❓
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB NAVIGATION BAR -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 pt-1 pb-2 flex gap-2 border-t border-slate-100 overflow-x-auto">
+      <button id="tabBtnSim" class="tab-btn active px-4 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-1.5">
+        <span>🎮</span> Simulasi Interaktif & Kuis
+      </button>
+      <button id="tabBtnMateri" class="tab-btn bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-1.5">
+        <span>📚</span> Materi Lengkap Bab 4 (Sumber NotebookLM)
+      </button>
+      <button id="tabBtnLkpd" class="tab-btn bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-1.5">
+        <span>📝</span> Lembar Kerja Siswa (LKPD) & Guru
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= NOTIFIKASI TOAST SALIN NOTEBOOKLM ================= -->
+  <div id="toastCopied" class="fixed top-20 right-6 z-50 bg-purple-900 text-white px-4 py-2.5 rounded-2xl shadow-xl border-2 border-purple-400 text-xs font-bold flex items-center gap-2 transform translate-y-[-100px] opacity-0 transition-all duration-300 pointer-events-none">
+    <span>✅</span>
+    <span>Seluruh materi IPAS Bab 4 berhasil disalin! Buka notebooklm.google.com dan tempelkan sebagai sumber.</span>
+  </div>
+
+  <!-- ================= TAB 1: SIMULASI INTERAKTIF & KUIS ================= -->
+  <div id="tabContentSim" class="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-5">
+    
+    <!-- PANEL KIRI (5 Kolom): KONTROL & EDUKASI DINAMIS -->
+    <div class="lg:col-span-5 flex flex-col gap-4">
+
+      <!-- KARTU 1: KENDALI SLIDER & TOMBOL SIMULASI -->
+      <section class="bg-white rounded-3xl p-5 shadow-lg border-2 border-slate-200/80 flex flex-col gap-4">
+        <div class="flex items-center justify-between border-b pb-3 border-slate-100">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">🎛️</span>
+            <div>
+              <h2 class="text-lg font-bold text-slate-800 font-fun">Laboratorium Kendali Bumi</h2>
+              <p class="text-xs text-slate-500">Geser tuas di bawah untuk melihat perubahan iklim!</p>
+            </div>
+          </div>
+          <button id="btnResetAll" class="px-3 py-1 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-600 text-xs font-bold border border-slate-200 hover:border-red-200 transition flex items-center gap-1 active:scale-95">
+            <span>🔄</span> Reset
+          </button>
+        </div>
+
+        <!-- Slider 1: Emisi Karbon / Polusi (CO2) -->
+        <div class="bg-amber-50/70 p-4 rounded-2xl border-2 border-amber-200/80 flex flex-col gap-2.5">
+          <div class="flex items-center justify-between">
+            <label for="sliderCo2" class="font-bold text-slate-800 text-sm flex items-center gap-2">
+              <span class="text-xl">🏭</span>
+              <span>Emisi Polusi Karbon (CO₂)</span>
+            </label>
+            <div class="flex items-center gap-1 bg-white px-2.5 py-1 rounded-lg border border-amber-300 shadow-xs">
+              <span id="valCo2" class="text-base font-extrabold text-amber-900 font-fun">35</span>
+              <span class="text-xs text-slate-500 font-bold">/ 100</span>
+            </div>
+          </div>
+
+          <input id="sliderCo2" type="range" min="1" max="100" value="35" class="slider-co2" />
+
+          <div class="flex items-center justify-between text-[11px] font-bold text-slate-500">
+            <span class="flex items-center gap-1 text-emerald-700">🌱 Udara Bersih (1)</span>
+            <span id="badgeCo2Status" class="px-2 py-0.5 rounded-full text-[10px] bg-amber-200 text-amber-900 font-extrabold">Polusi Sedang</span>
+            <span class="flex items-center gap-1 text-red-600">🔥 Sangat Kotor (100)</span>
+          </div>
+
+          <!-- Preset Cepat CO2 -->
+          <div class="pt-1 flex gap-1.5 text-xs">
+            <button class="preset-co2 flex-1 py-1 px-2 rounded-lg bg-white/90 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-semibold text-[11px] transition text-center" data-val="10">
+              🚲 Udara Bersih
+            </button>
+            <button class="preset-co2 flex-1 py-1 px-2 rounded-lg bg-white/90 hover:bg-amber-100 text-amber-800 border border-amber-300 font-semibold text-[11px] transition text-center" data-val="45">
+              🚗 Kota Biasa
+            </button>
+            <button class="preset-co2 flex-1 py-1 px-2 rounded-lg bg-white/90 hover:bg-red-100 text-red-800 border border-red-300 font-semibold text-[11px] transition text-center" data-val="85">
+              🏭 Pabrik Banyak
+            </button>
+          </div>
+        </div>
+
+        <!-- Slider 2: Jumlah Pepohonan / Hutan -->
+        <div class="bg-emerald-50/70 p-4 rounded-2xl border-2 border-emerald-200/80 flex flex-col gap-2.5">
+          <div class="flex items-center justify-between">
+            <label for="sliderTrees" class="font-bold text-slate-800 text-sm flex items-center gap-2">
+              <span class="text-xl">🌳</span>
+              <span>Jumlah Pepohonan & Hutan</span>
+            </label>
+            <div class="flex items-center gap-1 bg-white px-2.5 py-1 rounded-lg border border-emerald-300 shadow-xs">
+              <span id="valTrees" class="text-base font-extrabold text-emerald-900 font-fun">60</span>
+              <span class="text-xs text-slate-500 font-bold">/ 100</span>
+            </div>
+          </div>
+
+          <input id="sliderTrees" type="range" min="1" max="100" value="60" class="slider-trees" />
+
+          <div class="flex items-center justify-between text-[11px] font-bold text-slate-500">
+            <span class="flex items-center gap-1 text-amber-700">🪵 Gundul (1)</span>
+            <span id="badgeTreeStatus" class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-200 text-emerald-900 font-extrabold">Hutan Rindang</span>
+            <span class="flex items-center gap-1 text-emerald-700">🌲 Rimba Sejuk (100)</span>
+          </div>
+
+          <!-- Preset Cepat Pepohonan -->
+          <div class="pt-1 flex gap-1.5 text-xs">
+            <button class="preset-trees flex-1 py-1 px-2 rounded-lg bg-white/90 hover:bg-amber-100 text-amber-800 border border-amber-300 font-semibold text-[11px] transition text-center" data-val="10">
+              🪓 Hutan Gundul
+            </button>
+            <button class="preset-trees flex-1 py-1 px-2 rounded-lg bg-white/90 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-semibold text-[11px] transition text-center" data-val="50">
+              🌿 Kebun Biasa
+            </button>
+            <button class="preset-trees flex-1 py-1 px-2 rounded-lg bg-white/90 hover:bg-green-100 text-green-800 border border-green-300 font-semibold text-[11px] transition text-center" data-val="90">
+              🌲 Tanam Sejuta Pohon
+            </button>
+          </div>
+        </div>
+
+        <!-- Tombol Toggle Siang/Malam & Sinar Matahari -->
+        <div class="grid grid-cols-2 gap-2.5 pt-1">
+          <button id="btnSunToggle" class="py-2.5 px-3 rounded-2xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 border-2 border-amber-500/40 shadow-sm transition active:scale-95">
+            <span id="sunIcon" class="text-lg">☀️</span>
+            <span id="sunLabel">Waktu: Siang Hari</span>
+          </button>
+
+          <button id="btnRadiationToggle" class="py-2.5 px-3 rounded-2xl bg-sky-100 hover:bg-sky-200 text-sky-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 border-2 border-sky-300 shadow-sm transition active:scale-95">
+            <span id="radIcon" class="text-lg">✨</span>
+            <span id="radLabel">Sinar Panas: Aktif</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- KARTU 2: PANEL EDUKASI & KESIMPULAN DINAMIS -->
+      <section class="bg-white rounded-3xl p-5 shadow-lg border-2 border-slate-200/80 flex flex-col gap-3">
+        <div class="flex items-center justify-between border-b pb-2.5 border-slate-100">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">💡</span>
+            <div>
+              <h2 class="text-lg font-bold text-slate-800 font-fun">Catatan Detektif Iklim</h2>
+              <p class="text-xs text-slate-500">Umpan balik otomatis reaksi bumi saat ini</p>
+            </div>
+          </div>
+          <button id="btnSpeakFeedback" class="px-2.5 py-1 rounded-xl bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold transition flex items-center gap-1 shadow-xs active:scale-95">
+            <span>🗣️</span> Bacakan
+          </button>
+        </div>
+
+        <!-- Dynamic Feedback Box -->
+        <div id="dynamicFeedbackContainer" class="p-4 rounded-2xl bg-blue-50 border-2 border-blue-200 transition-colors duration-300 flex items-start gap-3">
+          <div id="feedbackEmotion" class="text-3xl shrink-0 pt-0.5">😊</div>
+          <div class="flex-1">
+            <h3 id="feedbackTitle" class="font-bold text-blue-900 text-sm font-fun">Bumi Sedang Sehat & Sejuk!</h3>
+            <p id="feedbackText" class="text-xs text-blue-800 mt-1 leading-relaxed">
+              Kadar polusi seimbang dengan pepohonan hijau. Efek rumah kaca alami bekerja menjaga suhu bumi tetap nyaman untuk kita tinggali.
+            </p>
+          </div>
+        </div>
+
+        <!-- IPAS Bab 4 Micro-Explanation Accordion -->
+        <div class="bg-slate-50 rounded-2xl p-3 border border-slate-200 text-xs space-y-2">
+          <div class="font-bold text-slate-700 flex items-center gap-1.5 text-xs">
+            <span>📖</span> <span>Pojok Konsep IPAS Kelas 4:</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-[11px]">
+            <div class="bg-white p-2 rounded-xl border border-slate-200">
+              <span class="font-bold text-amber-700 block mb-0.5">Selimut Atmosfer ☁️</span>
+              Gas rumah kaca seperti selimut. Jika terlalu tebal karena polusi CO₂, bumi akan demam!
+            </div>
+            <div class="bg-white p-2 rounded-xl border border-slate-200">
+              <span class="font-bold text-emerald-700 block mb-0.5">Pahlawan Pohon 🌳</span>
+              Pohon menyerap CO₂ dan menghasilkan oksigen segar melalui fotosintesis, mendinginkan bumi!
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- KARTU 3: KUIS REFLEKSI IPAS 3 SOAL -->
+      <section class="bg-white rounded-3xl p-5 shadow-lg border-2 border-slate-200/80 flex flex-col gap-3">
+        <div class="flex items-center justify-between border-b pb-2.5 border-slate-100">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">⭐</span>
+            <div>
+              <h2 class="text-lg font-bold text-slate-800 font-fun">Kuis Singkat Refleksi</h2>
+              <p class="text-xs text-slate-500">Coba jawab 3 soal latihan materi Bab 4 ini!</p>
+            </div>
+          </div>
+          <span id="quizScoreBadge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+            Skor: 0 / 3
+          </span>
+        </div>
+
+        <!-- Quiz Container -->
+        <div id="quizContainer" class="flex flex-col gap-3"></div>
+
+        <button id="btnResetQuiz" class="w-full py-2 rounded-xl bg-slate-100 hover:bg-sky-50 text-slate-700 hover:text-sky-700 text-xs font-bold border border-slate-200 transition text-center">
+          Ulangi Kuis dari Awal 🔄
+        </button>
+      </section>
+
+    </div>
+
+    <!-- PANEL KANAN (7 Kolom): VISUALISASI CANVAS SIMULASI -->
+    <div class="lg:col-span-7 flex flex-col gap-4">
+
+      <!-- KARTU CANVAS UTAMA -->
+      <section class="bg-white rounded-3xl p-4 sm:p-5 shadow-lg border-2 border-slate-200/80 flex flex-col gap-3">
+        
+        <!-- Header Canvas & Termometer Terintegrasi -->
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b pb-3 border-slate-100">
+          <div>
+            <h2 class="text-lg font-bold text-slate-800 font-fun flex items-center gap-2">
+              <span>🔭</span> Visualisasi Atmosfer & Efek Rumah Kaca
+            </h2>
+            <p class="text-xs text-slate-500">Lihat partikel sinar matahari memantul dan es kutub mencair!</p>
+          </div>
+
+          <!-- Digital Thermometer Live Badge -->
+          <div class="flex items-center gap-2.5 bg-slate-50 p-2 rounded-2xl border-2 border-slate-200 shadow-xs">
+            <div class="w-4 h-11 bg-slate-200 rounded-full p-0.5 relative flex flex-col justify-end overflow-hidden border border-slate-300">
+              <div id="thermoLiquidMini" class="w-full bg-emerald-500 rounded-full transition-all duration-300" style="height: 35%;"></div>
+            </div>
+            <div>
+              <div class="text-[10px] uppercase tracking-wider font-extrabold text-slate-400">Suhu Bumi</div>
+              <div class="flex items-baseline gap-1">
+                <span id="displayTempNumber" class="text-2xl font-black text-emerald-600 font-fun">25.0</span>
+                <span class="text-xs font-extrabold text-slate-600">°C</span>
+              </div>
+            </div>
+            <div id="tempStatusBadge" class="px-2.5 py-1 rounded-xl text-xs font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">
+              Sejuk & Normal
+            </div>
+          </div>
+        </div>
+
+        <!-- Wadah Canvas Interaktif -->
+        <div class="relative w-full aspect-[4/3] sm:aspect-[16/11] rounded-2xl overflow-hidden bg-slate-900 border-2 border-slate-300 shadow-inner flex items-center justify-center">
+          <canvas id="simCanvas" class="w-full h-full block cursor-crosshair"></canvas>
+
+          <!-- Overlay Mini-Indicator on Canvas (Top Left) -->
+          <div class="absolute top-3 left-3 bg-black/60 backdrop-blur-md text-white px-3 py-2 rounded-xl text-xs font-bold border border-white/20 flex flex-col gap-1 shadow-lg pointer-events-none">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+              <span id="canvasConditionText">Atmosfer Stabil</span>
+            </div>
+            <div class="text-[10px] text-slate-300 flex items-center gap-2">
+              <span>Molekul CO₂: <b id="co2CountLabel">15</b></span>
+              <span>•</span>
+              <span>Pohon: <b id="treeCountLabel">60</b></span>
+            </div>
+          </div>
+
+          <!-- Overlay Legend on Canvas (Bottom Right) -->
+          <div class="absolute bottom-3 right-3 bg-black/70 backdrop-blur-md text-white/90 px-3 py-1.5 rounded-xl text-[10px] border border-white/20 flex flex-wrap items-center gap-2.5 shadow-md pointer-events-none">
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-400"></span> Sinar Matahari</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-500"></span> Panas Pantul</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-slate-400"></span> Molekul CO₂</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-cyan-300"></span> Es Kutub</span>
+          </div>
+        </div>
+
+        <!-- PENJELASAN ELEMEN VISUAL SIMULASI -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-center">
+          <div class="bg-amber-50/80 p-2.5 rounded-2xl border border-amber-200">
+            <div class="text-base mb-0.5">☀️ ➡️ 🌍</div>
+            <div class="font-bold text-amber-900 text-xs">Sinar Matahari</div>
+            <div class="text-[10px] text-amber-700 leading-tight">Menghangatkan permukaan daratan dan samudra bumi.</div>
+          </div>
+
+          <div class="bg-red-50/80 p-2.5 rounded-2xl border border-red-200">
+            <div class="text-base mb-0.5">☁️ 🔄 🔥</div>
+            <div class="font-bold text-red-900 text-xs">Efek Rumah Kaca</div>
+            <div class="text-[10px] text-red-700 leading-tight">Jika CO₂ tebal, panas memantul balik ke bumi!</div>
+          </div>
+
+          <div class="bg-cyan-50/80 p-2.5 rounded-2xl border border-cyan-200">
+            <div class="text-base mb-0.5">🧊 💧 🌊</div>
+            <div class="font-bold text-cyan-900 text-xs">Es Kutub Mencair</div>
+            <div class="text-[10px] text-cyan-700 leading-tight">Suhu >30°C mencairkan es & membuat air laut naik!</div>
+          </div>
+
+          <div class="bg-emerald-50/80 p-2.5 rounded-2xl border border-emerald-200">
+            <div class="text-base mb-0.5">🌳 💨 ❄️</div>
+            <div class="font-bold text-emerald-900 text-xs">Pohon Sejukkan Bumi</div>
+            <div class="text-[10px] text-emerald-700 leading-tight">Menghisap gas CO₂ sehingga suhu bumi kembali sejuk.</div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- KARTU 2: RANGKUMAN CEPAT MATERI IPAS BAB 4 -->
+      <section class="bg-white rounded-3xl p-5 shadow-lg border-2 border-slate-200/80 flex flex-col gap-3">
+        <div class="flex items-center justify-between border-b pb-2.5 border-slate-100">
+          <h3 class="text-base font-bold text-slate-800 font-fun flex items-center gap-2">
+            <span>🎯</span> Aksi Nyata Pelajar Pancasila untuk Menjaga Iklim
+          </h3>
+          <button onclick="document.getElementById('tabBtnMateri').click()" class="text-xs text-sky-600 font-bold hover:underline flex items-center gap-1">
+            Baca Materi Lengkap ➡️
+          </button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+          <div class="flex items-start gap-2.5 p-3 rounded-2xl bg-emerald-50 border border-emerald-200">
+            <span class="text-2xl">🌱</span>
+            <div>
+              <b class="text-emerald-950 block font-fun text-sm">Menanam & Menjaga Pohon</b>
+              <p class="text-emerald-800 text-[11px] mt-0.5">Pohon adalah paru-paru dunia yang menyerap gas karbon penyebab panas bumi.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-2.5 p-3 rounded-2xl bg-amber-50 border border-amber-200">
+            <span class="text-2xl">🚲</span>
+            <div>
+              <b class="text-amber-950 block font-fun text-sm">Bersepeda / Jalan Kaki</b>
+              <p class="text-amber-800 text-[11px] mt-0.5">Mengurangi asap kendaraan bermotor berbahan bakar fosil yang mencemari udara.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-2.5 p-3 rounded-2xl bg-sky-50 border border-sky-200">
+            <span class="text-2xl">💡</span>
+            <div>
+              <b class="text-sky-950 block font-fun text-sm">Hemat Energi Listrik</b>
+              <p class="text-sky-800 text-[11px] mt-0.5">Matikan lampu & kipas jika tidak dipakai, karena pembangkit listrik menghasilkan CO₂.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ================= TAB 2: MATERI LENGKAP BAB 4 (SUMBER UTAMA NOTEBOOKLM) ================= -->
+  <article id="tabContentMateri" class="hidden max-w-5xl mx-auto px-4 sm:px-6 py-6 flex-1 w-full flex-col gap-6">
+    <div class="bg-white rounded-3xl p-6 sm:p-10 shadow-xl border-2 border-slate-200 flex flex-col gap-6">
+      
+      <!-- Banner Judul Modul Ajar -->
+      <div class="border-b-2 border-slate-200 pb-5">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+          <span class="px-3 py-1 bg-sky-100 text-sky-800 rounded-full text-xs font-extrabold uppercase tracking-wider">
+            Buku Saku IPAS Fase B Kelas 4
+          </span>
+          <button id="btnCopyFromMateri" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+            <span>📋</span> Salin Teks untuk NotebookLM
+          </button>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 font-fun">
+          Bab 4: Iklim dan Perubahannya
+        </h2>
+        <p class="text-sm text-slate-600 mt-1">
+          Materi Terstruktur Kurikulum Merdeka Sekolah Dasar • Siap Diindeks oleh Google NotebookLM untuk Tanya-Jawab, Rangkuman, dan Audio Podcast Edukasi.
+        </p>
+      </div>
+
+      <!-- Bagian 1: Identitas & Capaian Pembelajaran -->
+      <section class="bg-slate-50 p-5 rounded-2xl border border-slate-200 text-sm space-y-2">
+        <h3 class="font-bold text-slate-900 text-base font-fun flex items-center gap-2">
+          <span>🎯</span> Capaian Pembelajaran (CP) & Tujuan Pembelajaran (TP)
+        </h3>
+        <p class="text-slate-700 text-xs sm:text-sm leading-relaxed">
+          Pada Fase B (Kelas 4 SD), peserta didik mempelajari hubungan antara alam dan aktivitas manusia. Secara spesifik, dalam Bab 4 peserta didik diharapkan dapat:
+        </p>
+        <ul class="list-disc list-inside text-xs sm:text-sm text-slate-700 space-y-1 pl-2">
+          <li>Membedakan konsep <b>cuaca</b> (keadaan udara sesaat di tempat sempit) dan <b>iklim</b> (pola cuaca rata-rata dalam waktu sangat lama di wilayah luas).</li>
+          <li>Menjelaskan proses terjadinya <b>Efek Rumah Kaca</b> alami yang menjaga suhu bumi tetap hangat dan layak huni.</li>
+          <li>Mengidentifikasi penyebab <b>Pemanasan Global</b> akibat aktivitas manusia yang menghasilkan gas rumah kaca berlebih (terutama Karbon Dioksida / CO₂).</li>
+          <li>Menganalisis dampak pemanasan global terhadap pencairan es kutub, kenaikan permukaan air laut, dan cuaca ekstrem.</li>
+          <li>Membuktikan pentingnya <b>peran hutan dan pohon</b> dalam menyerap karbon dioksida serta mendinginkan suhu bumi.</li>
+          <li>Menumbuhkan kesadaran Profil Pelajar Pancasila (Beriman, Bertakwa kepada Tuhan YME dan Berakhlak Mulia pada Alam) melalui aksi nyata pelestarian lingkungan.</li>
+        </ul>
+      </section>
+
+      <!-- Bagian 2: Topik A - Perbedaan Cuaca dan Iklim -->
+      <section class="space-y-3 text-slate-700 text-sm leading-relaxed">
+        <h3 class="font-bold text-slate-900 text-lg font-fun flex items-center gap-2 border-b pb-2 border-slate-100">
+          <span>🌦️</span> Topik A: Membedakan Cuaca dan Iklim
+        </h3>
+        <p>
+          Banyak orang sering menyamakan antara cuaca dan iklim, padahal keduanya memiliki perbedaan mendasar dalam hal <b>waktu</b> dan <b>luas wilayah</b>:
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
+          <div class="bg-sky-50 p-4 rounded-2xl border border-sky-200">
+            <h4 class="font-bold text-sky-900 text-sm font-fun mb-1">1. Cuaca (Weather)</h4>
+            <ul class="text-xs space-y-1 text-sky-950">
+              <li>• <b>Pengertian:</b> Keadaan udara pada suatu tempat tertentu dalam waktu yang singkat (menit, jam, atau hari).</li>
+              <li>• <b>Ciri:</b> Sangat cepat berubah. Pagi hari cerah, siang hari tiba-tiba hujan lebat berangin.</li>
+              <li>• <b>Contoh:</b> "Hari ini di Jakarta cuacanya hujan gerimis bersuhu 27°C."</li>
+            </ul>
+          </div>
+          <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200">
+            <h4 class="font-bold text-emerald-900 text-sm font-fun mb-1">2. Iklim (Climate)</h4>
+            <ul class="text-xs space-y-1 text-emerald-950">
+              <li>• <b>Pengertian:</b> Pola atau rata-rata cuaca di suatu wilayah yang sangat luas dalam kurun waktu yang sangat lama (30 tahun atau lebih).</li>
+              <li>• <b>Ciri:</b> Bersifat tetap dan musiman, tidak berubah mendadak dari hari ke hari.</li>
+              <li>• <b>Contoh:</b> "Indonesia beriklim tropis dengan dua musim, yaitu musim kemarau dan musim hujan."</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bagian 3: Topik B - Fenomena Efek Rumah Kaca -->
+      <section class="space-y-3 text-slate-700 text-sm leading-relaxed">
+        <h3 class="font-bold text-slate-900 text-lg font-fun flex items-center gap-2 border-b pb-2 border-slate-100">
+          <span>🏠</span> Topik B: Rahasia Efek Rumah Kaca (Greenhouse Effect)
+        </h3>
+        <p>
+          Istilah <b>Efek Rumah Kaca</b> diambil dari cara kerja rumah kaca pertanian yang terbuat dari dinding kaca atau plastik bening. Sinar matahari masuk ke dalam rumah kaca dan menghangatkan tanaman di dalamnya. Panas tersebut terperangkap dan tidak bisa keluar dengan mudah, sehingga suhu di dalam rumah kaca tetap hangat meskipun di luar sedang musim dingin.
+        </p>
+        <p>
+          Bumi kita juga memiliki "rumah kaca" raksasa berupa <b>Lapisan Atmosfer</b> yang berisi gas-gas tertentu (Gas Rumah Kaca):
+        </p>
+        <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200 text-xs sm:text-sm space-y-2">
+          <b class="text-amber-950 block font-fun">Cara Kerja Efek Rumah Kaca di Bumi:</b>
+          <ol class="list-decimal list-inside space-y-1 text-amber-900">
+            <li>Sinar matahari (cahaya dan panas) meluncur dari luar angkasa menembus atmosfer bumi.</li>
+            <li>Sebagian sinar diserap oleh tanah, tumbuhan, dan samudra untuk menghangatkan bumi.</li>
+            <li>Sebagian panas lainnya dipancarkan kembali oleh permukaan bumi menuju luar angkasa dalam bentuk gelombang panas inframerah.</li>
+            <li>Gas rumah kaca di atmosfer (seperti Karbon Dioksida / CO₂, Uap Air, dan Metana) menangkap sebagian panas tersebut dan memantulkannya kembali ke permukaan bumi.</li>
+            <li><b>Manfaat Alami:</b> Berkat efek rumah kaca alami ini, suhu rata-rata bumi bertahan di sekitar <b>15°C hingga 25°C</b>. Tanpa efek rumah kaca alami, bumi akan menjadi planet beku dengan suhu ekstrem minus 18°C yang tidak bisa ditinggali manusia!</li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- Bagian 4: Topik C - Pemanasan Global -->
+      <section class="space-y-3 text-slate-700 text-sm leading-relaxed">
+        <h3 class="font-bold text-slate-900 text-lg font-fun flex items-center gap-2 border-b pb-2 border-slate-100">
+          <span>🔥</span> Topik C: Mengapa Bumi Bertambah Panas? (Pemanasan Global)
+        </h3>
+        <p>
+          Jika efek rumah kaca itu alami, mengapa sekarang menjadi masalah besar? Masalah muncul karena <b>ketebalan gas rumah kaca menjadi terlalu berlebih</b> akibat ulah dan aktivitas manusia yang tidak ramah lingkungan.
+        </p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div class="p-3 rounded-xl bg-red-50 border border-red-200">
+            <b class="text-red-950 font-fun block mb-1">1. Polusi Kendaraan & Pabrik</b>
+            Mobil, motor, truk, dan pabrik membakar bahan bakar fosil (minyak bumi, bensin, solar, batu bara) yang membuang gas CO₂ ke udara setiap detik.
+          </div>
+          <div class="p-3 rounded-xl bg-red-50 border border-red-200">
+            <b class="text-red-950 font-fun block mb-1">2. Penebangan Hutan (Deforestasi)</b>
+            Pohon-pohon ditebang dan dibakar secara liar. Padahal pohon adalah penyerap utama gas CO₂ di dunia.
+          </div>
+          <div class="p-3 rounded-xl bg-red-50 border border-red-200">
+            <b class="text-red-950 font-fun block mb-1">3. Pemborosan Listrik</b>
+            Sebagian besar pembangkit listrik masih membakar batu bara. Semakin boros kita memakai listrik, semakin banyak asap polusi yang dihasilkan.
+          </div>
+          <div class="p-3 rounded-xl bg-red-50 border border-red-200">
+            <b class="text-red-950 font-fun block mb-1">4. Sampah Menumpuk & Membusuk</b>
+            Tumpukan sampah plastik yang dibakar atau sisa makanan yang membusuk di TPA menghasilkan gas metana yang sangat kuat menjebak panas.
+          </div>
+        </div>
+
+        <h4 class="font-bold text-slate-800 text-sm font-fun mt-4">Dampak Pemanasan Global bagi Bumi:</h4>
+        <ul class="list-disc list-inside text-xs sm:text-sm text-slate-700 space-y-1 pl-2">
+          <li><b>Mencairnya Es di Kutub:</b> Suhu udara dan air laut yang menghangat di atas 30°C membuat gletser dan bongkahan es di kutub utara dan selatan meleleh secara masif. Hewan seperti beruang kutub dan penguin kehilangan habitat tempat tinggal mereka.</li>
+          <li><b>Kenaikan Permukaan Air Laut:</b> Lelehan es mengalir ke lautan sehingga air laut naik. Hal ini mengancam menenggelamkan pulau-pulau kecil dan kota-kota di pesisir pantai.</li>
+          <li><b>Cuaca Ekstrem dan Bencana Alam:</b> Musim kemarau menjadi sangat panjang dan kering memicu kebakaran hutan, sedangkan musim hujan menimbulkan badai dahsyat dan banjir bandang.</li>
+        </ul>
+      </section>
+
+      <!-- Bagian 5: Topik D - Pohon & Aksi Nyata -->
+      <section class="space-y-3 text-slate-700 text-sm leading-relaxed">
+        <h3 class="font-bold text-slate-900 text-lg font-fun flex items-center gap-2 border-b pb-2 border-slate-100">
+          <span>🌳</span> Topik D: Hutan Sebagai Paru-Paru Dunia & Aksi Kita
+        </h3>
+        <p>
+          Tumbuhan dan pohon hijau adalah pahlawan terhebat bagi iklim bumi. Melalui proses <b>Fotosintesis</b>, daun-daun hijau menghirup gas Karbon Dioksida (CO₂) dari udara dengan bantuan sinar matahari, lalu mengubahnya menjadi oksigen bersih (O₂) dan cadangan makanan.
+        </p>
+        <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 text-xs sm:text-sm">
+          <b class="text-emerald-950 block font-fun mb-1">Aksi Nyata yang Dapat Dilakukan Siswa SD Kelas 4:</b>
+          <ol class="list-decimal list-inside space-y-1.5 text-emerald-900">
+            <li><b>Gerakan Menanam Pohon:</b> Menanam bunga, sayuran, atau bibit pohon di halaman rumah dan taman sekolah (Reboisasi).</li>
+            <li><b>Bersepeda atau Berjalan Kaki:</b> Memilih berjalan kaki atau naik sepeda untuk jarak dekat ke sekolah daripada meminta diantar dengan mobil atau motor.</li>
+            <li><b>Hemat Energi di Rumah:</b> Mematikan lampu ruangan yang terang, mematikan kipas angin dan televisi jika tidak ditonton.</li>
+            <li><b>Membawa Botol Minum (Tumbler):</b> Mengurangi penggunaan botol plastik sekali pakai dengan membawa botol minum dan kotak bekal sendiri dari rumah.</li>
+            <li><b>Menerapkan Prinsip 3R:</b> <i>Reduce</i> (mengurangi barang sekali pakai), <i>Reuse</i> (memakai kembali barang yang masih layak), dan <i>Recycle</i> (mendaur ulang sampah).</li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- Bagian 6: Glosarium Istilah IPAS Bab 4 -->
+      <section class="bg-slate-50 p-5 rounded-2xl border border-slate-200 text-sm space-y-3">
+        <h3 class="font-bold text-slate-900 text-base font-fun flex items-center gap-2">
+          <span>📖</span> Glosarium Istilah Penting IPAS Kelas 4
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div class="bg-white p-3 rounded-xl border border-slate-200">
+            <b class="text-sky-700">Atmosfer:</b> Lapisan udara yang membungkus dan melindungi planet bumi dari radiasi berbahaya luar angkasa.
+          </div>
+          <div class="bg-white p-3 rounded-xl border border-slate-200">
+            <b class="text-amber-700">Karbon Dioksida (CO₂):</b> Gas tak berwarna yang dihasilkan dari pernapasan makhluk hidup dan pembakaran bahan bakar fosil.
+          </div>
+          <div class="bg-white p-3 rounded-xl border border-slate-200">
+            <b class="text-red-700">Pemanasan Global:</b> Fenomena peningkatan suhu rata-rata permukaan bumi akibat penumpukan gas rumah kaca.
+          </div>
+          <div class="bg-white p-3 rounded-xl border border-slate-200">
+            <b class="text-emerald-700">Fotosintesis:</b> Proses tumbuhan hijau membuat makanan menggunakan air, cahaya matahari, dan gas CO₂ serta melepas O₂.
+          </div>
+          <div class="bg-white p-3 rounded-xl border border-slate-200">
+            <b class="text-green-700">Reboisasi:</b> Penanaman kembali hutan yang gundul atau gersang agar kembali hijau dan asri.
+          </div>
+          <div class="bg-white p-3 rounded-xl border border-slate-200">
+            <b class="text-purple-700">Bahan Bakar Fosil:</b> Sumber energi yang berasal dari sisa jasad tumbuhan dan hewan purba jutaan tahun lalu (batu bara, minyak bumi).
+          </div>
+        </div>
+      </section>
+
+      <!-- Bagian 7: Bank Soal Formatif IPAS Kelas 4 -->
+      <section class="space-y-3 text-slate-700 text-sm leading-relaxed">
+        <h3 class="font-bold text-slate-900 text-lg font-fun flex items-center gap-2 border-b pb-2 border-slate-100">
+          <span>📝</span> Bank Soal Formatif Refleksi & Pembahasan
+        </h3>
+        <div class="space-y-3 text-xs">
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+            <b class="text-slate-900">Soal 1: Apakah efek rumah kaca secara alami itu berbahaya bagi bumi?</b>
+            <p class="text-slate-600"><b>Jawaban:</b> Tidak. Efek rumah kaca alami justru sangat bermanfaat karena menghangatkan bumi agar suhu rata-rata tetap nyaman (~25°C). Yang berbahaya adalah jika jumlah gas rumah kaca berlebih sehingga suhu melonjak panas!</p>
+          </div>
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+            <b class="text-slate-900">Soal 2: Apa akibat jika suhu bumi meningkat dan melebihi 30°C secara terus-menerus?</b>
+            <p class="text-slate-600"><b>Jawaban:</b> Lapisan es di kutub utara dan selatan akan mencair dengan cepat, menyebabkan permukaan air laut naik dan membanjiri daerah pesisir pantai serta menenggelamkan pulau-pulau rendah.</p>
+          </div>
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+            <b class="text-slate-900">Soal 3: Bagaimana pepohonan dapat mencegah kenaikan suhu bumi?</b>
+            <p class="text-slate-600"><b>Jawaban:</b> Pohon menyerap gas karbon dioksida (CO₂) dari udara untuk proses fotosintesis, sehingga ketebalan selimut gas rumah kaca di atmosfer berkurang dan suhu bumi tetap sejuk.</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </article>
+
+  <!-- ================= TAB 3: LEMBAR KERJA SISWA (LKPD) & PETUNJUK GURU ================= -->
+  <section id="tabContentLkpd" class="hidden max-w-5xl mx-auto px-4 sm:px-6 py-6 flex-1 w-full flex-col gap-6">
+    <div class="bg-white rounded-3xl p-6 sm:p-10 shadow-xl border-2 border-slate-200 flex flex-col gap-6">
+      
+      <div class="border-b-2 border-slate-200 pb-4">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-extrabold uppercase">
+            Panduan Pembelajaran Praktik
+          </span>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-900 font-fun">
+          Lembar Kerja Peserta Didik (LKPD) Berbasis Simulasi
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-600">
+          Petunjuk bagi guru dan siswa untuk melakukan praktikum mandiri menggunakan aplikasi simulasi ini.
+        </p>
+      </div>
+
+      <!-- Langkah Praktikum -->
+      <div class="space-y-4 text-xs sm:text-sm text-slate-700 leading-relaxed">
+        <h3 class="font-bold text-slate-900 text-base font-fun flex items-center gap-2">
+          <span>🔬</span> Langkah-Langkah Eksperimen Siswa:
+        </h3>
+
+        <!-- Percobaan 1 -->
+        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 space-y-2">
+          <b class="text-amber-950 font-fun text-sm block">Percobaan 1: Pengaruh Polusi CO₂ Terhadap Suhu</b>
+          <p>1. Buka kembali tab <b>Simulasi Interaktif</b>.</p>
+          <p>2. Atur slider pohon pada posisi sedang (50). Geser slider polusi CO₂ dari angka 10, lalu 50, lalu 90.</p>
+          <p>3. Amati termometer digital: <i>Apakah suhu bumi semakin panas atau semakin dingin? Apa yang terjadi pada partikel sinar merah di atmosfer?</i></p>
+        </div>
+
+        <!-- Percobaan 2 -->
+        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-2">
+          <b class="text-emerald-950 font-fun text-sm block">Percobaan 2: Menyelamatkan Bumi dengan Reboisasi</b>
+          <p>1. Biarkan slider polusi CO₂ di angka tinggi (80).</p>
+          <p>2. Sekarang, geser slider pepohonan dari angka 10 (hutan gundul) menuju angka 95 (hutan lebat).</p>
+          <p>3. Amati perubahan suhu dan ekspresi wajah bumi: <i>Berapa penurunan suhu yang terjadi setelah pohon ditanam?</i></p>
+        </div>
+
+        <!-- Percobaan 3 -->
+        <div class="p-4 rounded-2xl bg-cyan-50 border border-cyan-200 space-y-2">
+          <b class="text-cyan-950 font-fun text-sm block">Percobaan 3: Mengamati Mencairnya Es Kutub</b>
+          <p>1. Naikkan suhu bumi hingga melebihi 32°C.</p>
+          <p>2. Perhatikan bongkahan es di kutub utara (kiri) dan kutub selatan (kanan).</p>
+          <p>3. Catat apa yang terjadi pada ukuran es dan tinggi permukaan air laut!</p>
+        </div>
+      </div>
+
+      <!-- Tabel Pengamatan LKPD Siswa -->
+      <div class="overflow-x-auto">
+        <h4 class="font-bold text-slate-800 text-sm font-fun mb-2">Tabel Catatan Pengamatan Siswa:</h4>
+        <table class="w-full text-xs text-left border border-slate-200 rounded-xl overflow-hidden">
+          <thead class="bg-slate-100 text-slate-700 uppercase font-bold text-[10px]">
+            <tr>
+              <th class="p-2.5 border">Kondisi Eksperimen</th>
+              <th class="p-2.5 border">Nilai CO₂</th>
+              <th class="p-2.5 border">Nilai Pohon</th>
+              <th class="p-2.5 border">Suhu (°C)</th>
+              <th class="p-2.5 border">Kondisi Es Kutub</th>
+              <th class="p-2.5 border">Ekspresi Bumi</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 text-slate-600">
+            <tr>
+              <td class="p-2.5 border font-semibold">1. Udara Bersih & Hutan Sejuk</td>
+              <td class="p-2.5 border">15</td>
+              <td class="p-2.5 border">85</td>
+              <td class="p-2.5 border text-emerald-600 font-bold">~22°C</td>
+              <td class="p-2.5 border">Utuh & Kokoh</td>
+              <td class="p-2.5 border">Tersenyum Bahagia 😊</td>
+            </tr>
+            <tr>
+              <td class="p-2.5 border font-semibold">2. Kota Standar</td>
+              <td class="p-2.5 border">45</td>
+              <td class="p-2.5 border">50</td>
+              <td class="p-2.5 border text-amber-600 font-bold">~26°C</td>
+              <td class="p-2.5 border">Stabil</td>
+              <td class="p-2.5 border">Tenang & Nyaman 😊</td>
+            </tr>
+            <tr>
+              <td class="p-2.5 border font-semibold">3. Pabrik Banyak & Hutan Gundul</td>
+              <td class="p-2.5 border">90</td>
+              <td class="p-2.5 border">15</td>
+              <td class="p-2.5 border text-red-600 font-bold">>37°C</td>
+              <td class="p-2.5 border text-red-600">Mencair Drastis</td>
+              <td class="p-2.5 border">Demam & Menangis 🤒</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-wrap items-center justify-between text-xs text-slate-500 gap-2">
+      <div>
+        <b>Simulasi IPAS Kelas 4 Bab 4</b> • Kurikulum Merdeka Kemendikbudristek
+      </div>
+      <div>
+        Berkas HTML Mandiri • Siap Diunggah ke Web Hosting & Diindeks di NotebookLM 🇮🇩
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= MODAL BANTUAN CARA BERMAIN ================= -->
+  <div id="modalHelp" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border-4 border-sky-300 flex flex-col gap-4">
+      <div class="flex items-center justify-between border-b pb-3">
+        <h3 class="text-lg font-bold text-slate-800 font-fun flex items-center gap-2">
+          <span>📖</span> Panduan Bermain Detektif Iklim
+        </h3>
+        <button id="btnCloseHelp" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center">
+          ✕
+        </button>
+      </div>
+
+      <div class="text-xs sm:text-sm text-slate-600 space-y-3 leading-relaxed">
+        <p>Halo Sahabat Bumi Kelas 4! Begini cara bereksperimen di laboratorium iklim:</p>
+        <ul class="space-y-2 list-none pl-1">
+          <li class="flex items-start gap-2">
+            <span class="text-base">1️⃣</span>
+            <span><b>Geser Tuas Emisi Polusi (CO₂):</b> Naikkan nilainya ke angka 80-100 dan perhatikan bagaimana molekul gas di atmosfer menumpuk serta memantulkan panas kembali ke bumi!</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-base">2️⃣</span>
+            <span><b>Perhatikan Suhu & Es Kutub:</b> Jika suhu melewati 30°C, bongkahan es kutub utara dan selatan perlahan meleleh dan air laut akan naik!</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-base">3️⃣</span>
+            <span><b>Selamatkan Bumi dengan Menanam Pohon:</b> Geser tuas pohon ke angka tinggi (80-100). Hutan akan menyerap CO₂ dan mendinginkan suhu bumi kembali ke 25°C!</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-base">4️⃣</span>
+            <span><b>Pelajari Materi Lengkap:</b> Buka tab "Materi Lengkap Bab 4" untuk membaca teks kurikulum yang bisa disalin ke NotebookLM!</span>
+          </li>
+        </ul>
+      </div>
+
+      <button id="btnUnderstandHelp" class="w-full py-2.5 rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-sm shadow-md transition">
+        Saya Mengerti, Ayo Eksperimen! 🚀
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= JAVASCRIPT LOGIC LENGKAP ================= -->
+  <script type="module">
+    // --- STATE SIMULASI ---
+    const state = {
+      co2: 35,          // 1 - 100
+      trees: 60,        // 1 - 100
+      isDay: true,       // Siang / Malam
+      isRadiationOn: true, // Sinar matahari aktif
+      temp: 25.0,       // Derajat Celsius
+      seaLevelRise: 0,  // Offset piksel kenaikan air laut
+      iceMeltPercent: 0,// 0 (utuh) hingga 1 (habis meleleh)
+      ttsEnabled: true,
+      sfxEnabled: true,
+      audioCtx: null
+    };
+
+    // --- TAB NAVIGATION SYSTEM ---
+    const tabBtnSim = document.getElementById('tabBtnSim');
+    const tabBtnMateri = document.getElementById('tabBtnMateri');
+    const tabBtnLkpd = document.getElementById('tabBtnLkpd');
+    const tabContentSim = document.getElementById('tabContentSim');
+    const tabContentMateri = document.getElementById('tabContentMateri');
+    const tabContentLkpd = document.getElementById('tabContentLkpd');
+
+    function setActiveTab(tab) {
+      [tabBtnSim, tabBtnMateri, tabBtnLkpd].forEach(btn => {
+        btn.classList.remove('active', 'bg-sky-600', 'text-white');
+        btn.classList.add('bg-slate-100', 'text-slate-700');
+      });
+      tabContentSim.classList.add('hidden');
+      tabContentMateri.classList.add('hidden');
+      tabContentLkpd.classList.add('hidden');
+
+      if (tab === 'sim') {
+        tabBtnSim.classList.add('active');
+        tabBtnSim.classList.remove('bg-slate-100', 'text-slate-700');
+        tabContentSim.classList.remove('hidden');
+        resizeCanvas();
+      } else if (tab === 'materi') {
+        tabBtnMateri.classList.add('active');
+        tabBtnMateri.classList.remove('bg-slate-100', 'text-slate-700');
+        tabContentMateri.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (tab === 'lkpd') {
+        tabBtnLkpd.classList.add('active');
+        tabBtnLkpd.classList.remove('bg-slate-100', 'text-slate-700');
+        tabContentLkpd.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    tabBtnSim.addEventListener('click', () => setActiveTab('sim'));
+    tabBtnMateri.addEventListener('click', () => setActiveTab('materi'));
+    tabBtnLkpd.addEventListener('click', () => setActiveTab('lkpd'));
+
+    // --- FITUR SALIN TEKS UNTUK NOTEBOOKLM ---
+    const toastCopied = document.getElementById('toastCopied');
+    function showToast() {
+      toastCopied.classList.remove('translate-y-[-100px]', 'opacity-0');
+      toastCopied.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toastCopied.classList.remove('translate-y-0', 'opacity-100');
+        toastCopied.classList.add('translate-y-[-100px]', 'opacity-0');
+      }, 4000);
+    }
+
+    function copyCurriculumForNotebookLm() {
+      const materiArticle = document.getElementById('tabContentMateri');
+      const textToCopy = materiArticle.innerText;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          showToast();
+          playSuccessChime();
+        });
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = textToCopy;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast();
+        playSuccessChime();
+      }
+    }
+
+    document.getElementById('btnCopyNotebookLm').addEventListener('click', copyCurriculumForNotebookLm);
+    document.getElementById('btnCopyFromMateri').addEventListener('click', copyCurriculumForNotebookLm);
+
+    // --- WEB AUDIO SYNTHESIZER (SOUND EFFECTS) ---
+    function initAudio() {
+      if (!state.audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          state.audioCtx = new AudioContextClass();
+        }
+      }
+      if (state.audioCtx && state.audioCtx.state === 'suspended') {
+        state.audioCtx.resume();
+      }
+    }
+
+    function playTone(freq, duration = 0.15, type = 'sine', gainVal = 0.1) {
+      if (!state.sfxEnabled) return;
+      try {
+        initAudio();
+        if (!state.audioCtx) return;
+        const osc = state.audioCtx.createOscillator();
+        const gain = state.audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, state.audioCtx.currentTime);
+        gain.gain.setValueAtTime(gainVal, state.audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, state.audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(state.audioCtx.destination);
+        osc.start();
+        osc.stop(state.audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function playSuccessChime() {
+      if (!state.sfxEnabled) return;
+      playTone(523.25, 0.12, 'triangle', 0.12);
+      setTimeout(() => playTone(659.25, 0.12, 'triangle', 0.12), 100);
+      setTimeout(() => playTone(783.99, 0.25, 'triangle', 0.15), 200);
+    }
+
+    function playWrongBuzz() {
+      if (!state.sfxEnabled) return;
+      playTone(220, 0.25, 'sawtooth', 0.08);
+      setTimeout(() => playTone(185, 0.25, 'sawtooth', 0.08), 120);
+    }
+
+    function playWarningAlarm() {
+      if (!state.sfxEnabled) return;
+      playTone(880, 0.18, 'sine', 0.08);
+      setTimeout(() => playTone(740, 0.18, 'sine', 0.08), 150);
+    }
+
+    // --- TEXT-TO-SPEECH (TTS) NARRATOR ---
+    async function speakText(text) {
+      if (!state.ttsEnabled) return;
+      
+      // 1. Coba server Gemini TTS jika tersedia
+      try {
+        const resp = await fetch('/api/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, speaker: 'Alex' })
+        });
+        const data = await resp.json();
+        if (data.success && data.audioBase64) {
+          const audio = new Audio(`data:${data.mimeType || 'audio/wav'};base64,${data.audioBase64}`);
+          audio.play();
+          return;
+        }
+      } catch (err) {}
+
+      // 2. Native Web Speech API fallback
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'id-ID';
+        utterance.rate = 0.95;
+        utterance.pitch = 1.1;
+
+        const voices = window.speechSynthesis.getVoices();
+        const idVoice = voices.find(v => v.lang.includes('id') || v.lang.includes('ID'));
+        if (idVoice) utterance.voice = idVoice;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    // --- KALKULASI SUHU BUMI ---
+    function calculateTemperature() {
+      let temp = 20 + (state.co2 * 0.22) - (state.trees * 0.12);
+      if (state.isDay) {
+        temp += 3.0;
+      } else {
+        temp -= 2.5;
+      }
+      if (!state.isRadiationOn) {
+        temp -= 2.0;
+      }
+
+      state.temp = Math.max(18.0, Math.min(44.0, parseFloat(temp.toFixed(1))));
+
+      if (state.temp <= 28) {
+        state.iceMeltPercent = 0;
+        state.seaLevelRise = 0;
+      } else {
+        const factor = Math.min(1, (state.temp - 28) / 12);
+        state.iceMeltPercent = factor;
+        state.seaLevelRise = factor * 22;
+      }
+    }
+
+    // --- DOM ELEMENT REFERENCES ---
+    const sliderCo2 = document.getElementById('sliderCo2');
+    const sliderTrees = document.getElementById('sliderTrees');
+    const valCo2 = document.getElementById('valCo2');
+    const valTrees = document.getElementById('valTrees');
+    const badgeCo2Status = document.getElementById('badgeCo2Status');
+    const badgeTreeStatus = document.getElementById('badgeTreeStatus');
+    const btnSunToggle = document.getElementById('btnSunToggle');
+    const sunIcon = document.getElementById('sunIcon');
+    const sunLabel = document.getElementById('sunLabel');
+    const btnRadiationToggle = document.getElementById('btnRadiationToggle');
+    const radIcon = document.getElementById('radIcon');
+    const radLabel = document.getElementById('radLabel');
+    const btnResetAll = document.getElementById('btnResetAll');
+    const displayTempNumber = document.getElementById('displayTempNumber');
+    const tempStatusBadge = document.getElementById('tempStatusBadge');
+    const thermoLiquidMini = document.getElementById('thermoLiquidMini');
+    const dynamicFeedbackContainer = document.getElementById('dynamicFeedbackContainer');
+    const feedbackEmotion = document.getElementById('feedbackEmotion');
+    const feedbackTitle = document.getElementById('feedbackTitle');
+    const feedbackText = document.getElementById('feedbackText');
+    const btnSpeakFeedback = document.getElementById('btnSpeakFeedback');
+    const canvasConditionText = document.getElementById('canvasConditionText');
+    const co2CountLabel = document.getElementById('co2CountLabel');
+    const treeCountLabel = document.getElementById('treeCountLabel');
+    const btnTtsToggle = document.getElementById('btnTtsToggle');
+    const ttsIcon = document.getElementById('ttsIcon');
+    const ttsLabel = document.getElementById('ttsLabel');
+    const btnSfxToggle = document.getElementById('btnSfxToggle');
+    const sfxIcon = document.getElementById('sfxIcon');
+    const btnDownloadHtml = document.getElementById('btnDownloadHtml');
+    const btnHelpModal = document.getElementById('btnHelpModal');
+    const modalHelp = document.getElementById('modalHelp');
+    const btnCloseHelp = document.getElementById('btnCloseHelp');
+    const btnUnderstandHelp = document.getElementById('btnUnderstandHelp');
+
+    // --- UPDATE DOM UI MENURUT STATE ---
+    function updateUI() {
+      calculateTemperature();
+
+      valCo2.textContent = state.co2;
+      valTrees.textContent = state.trees;
+      co2CountLabel.textContent = Math.round(state.co2 * 0.4);
+      treeCountLabel.textContent = state.trees;
+
+      if (state.co2 < 30) {
+        badgeCo2Status.textContent = 'Polusi Rendah';
+        badgeCo2Status.className = 'px-2 py-0.5 rounded-full text-[10px] bg-emerald-200 text-emerald-900 font-extrabold';
+      } else if (state.co2 <= 65) {
+        badgeCo2Status.textContent = 'Polusi Sedang';
+        badgeCo2Status.className = 'px-2 py-0.5 rounded-full text-[10px] bg-amber-200 text-amber-900 font-extrabold';
+      } else {
+        badgeCo2Status.textContent = 'Bahaya Polusi!';
+        badgeCo2Status.className = 'px-2 py-0.5 rounded-full text-[10px] bg-red-200 text-red-900 font-extrabold animate-pulse';
+      }
+
+      if (state.trees < 30) {
+        badgeTreeStatus.textContent = 'Hutan Gundul';
+        badgeTreeStatus.className = 'px-2 py-0.5 rounded-full text-[10px] bg-amber-200 text-amber-900 font-extrabold';
+      } else if (state.trees <= 70) {
+        badgeTreeStatus.textContent = 'Hutan Rindang';
+        badgeTreeStatus.className = 'px-2 py-0.5 rounded-full text-[10px] bg-emerald-200 text-emerald-900 font-extrabold';
+      } else {
+        badgeTreeStatus.textContent = 'Hutan Subur & Sejuk';
+        badgeTreeStatus.className = 'px-2 py-0.5 rounded-full text-[10px] bg-green-200 text-green-950 font-extrabold';
+      }
+
+      displayTempNumber.textContent = state.temp.toFixed(1);
+      const thermoHeight = Math.max(15, Math.min(100, ((state.temp - 18) / 26) * 100));
+      thermoLiquidMini.style.height = `${thermoHeight}%`;
+
+      if (state.temp <= 26.5) {
+        displayTempNumber.className = 'text-2xl font-black text-emerald-600 font-fun';
+        thermoLiquidMini.className = 'w-full bg-emerald-500 rounded-full transition-all duration-300';
+        tempStatusBadge.className = 'px-2.5 py-1 rounded-xl text-xs font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300';
+        tempStatusBadge.textContent = 'Sejuk & Normal (Ideal)';
+        canvasConditionText.textContent = 'Atmosfer Stabil & Sehat';
+      } else if (state.temp <= 31.0) {
+        displayTempNumber.className = 'text-2xl font-black text-amber-500 font-fun';
+        thermoLiquidMini.className = 'w-full bg-amber-500 rounded-full transition-all duration-300';
+        tempStatusBadge.className = 'px-2.5 py-1 rounded-xl text-xs font-extrabold bg-amber-100 text-amber-800 border border-amber-300';
+        tempStatusBadge.textContent = 'Mulai Menghangat';
+        canvasConditionText.textContent = 'Panas Mulai Terperangkap';
+      } else if (state.temp <= 36.5) {
+        displayTempNumber.className = 'text-2xl font-black text-orange-600 font-fun';
+        thermoLiquidMini.className = 'w-full bg-orange-500 rounded-full transition-all duration-300';
+        tempStatusBadge.className = 'px-2.5 py-1 rounded-xl text-xs font-extrabold bg-orange-100 text-orange-800 border border-orange-300';
+        tempStatusBadge.textContent = 'Pemanasan Global!';
+        canvasConditionText.textContent = 'Es Kutub Mencair Cepat!';
+      } else {
+        displayTempNumber.className = 'text-2xl font-black text-red-600 font-fun animate-bounce';
+        thermoLiquidMini.className = 'w-full bg-red-600 rounded-full transition-all duration-300';
+        tempStatusBadge.className = 'px-2.5 py-1 rounded-xl text-xs font-extrabold bg-red-100 text-red-800 border border-red-300 animate-pulse';
+        tempStatusBadge.textContent = 'Krisis Iklim Berbahaya!';
+        canvasConditionText.textContent = 'Darurat Pemanasan Global!';
+        playWarningAlarm();
+      }
+
+      updateFeedbackCard();
+    }
+
+    function updateFeedbackCard() {
+      if (state.co2 >= 65 && state.trees <= 35) {
+        feedbackEmotion.textContent = '🥵';
+        feedbackTitle.textContent = 'Peringatan Darurat! Suhu Bumi Naik Cepat!';
+        feedbackText.textContent = 'Suhu bumi melonjak drastis akibat polusi gas karbon (CO₂) yang terlalu tebal. Panas matahari terperangkap bagai di dalam oven dan es kutub mencair cepat sehingga air laut naik!';
+        dynamicFeedbackContainer.className = 'p-4 rounded-2xl bg-red-50 border-2 border-red-200 transition-colors duration-300 flex items-start gap-3';
+        feedbackTitle.className = 'font-bold text-red-900 text-sm font-fun';
+        feedbackText.className = 'text-xs text-red-800 mt-1 leading-relaxed';
+      } else if (state.trees >= 70 && state.co2 <= 50) {
+        feedbackEmotion.textContent = '🌳';
+        feedbackTitle.textContent = 'Luar Biasa! Pohon Bekerja Sejukkan Bumi!';
+        feedbackText.textContent = 'Pohon-pohon hijau dan hutan lebat aktif menyerap gas CO₂ melalui fotosintesis. Udara terasa segar, es di kutub tetap kokoh terjaga, dan suhu bumi kembali sejuk!';
+        dynamicFeedbackContainer.className = 'p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-200 transition-colors duration-300 flex items-start gap-3';
+        feedbackTitle.className = 'font-bold text-emerald-900 text-sm font-fun';
+        feedbackText.className = 'text-xs text-emerald-800 mt-1 leading-relaxed';
+      } else if (!state.isDay) {
+        feedbackEmotion.textContent = '🌙';
+        feedbackTitle.textContent = 'Malam Hari: Bumi Beristirahat';
+        feedbackText.textContent = 'Saat matahari terbenam, permukaan bumi melepaskan kembali sebagian panas yang diserap ke angkasa. Lapisan gas rumah kaca yang seimbang menjaga bumi agar tidak membeku saat malam.';
+        dynamicFeedbackContainer.className = 'p-4 rounded-2xl bg-indigo-50 border-2 border-indigo-200 transition-colors duration-300 flex items-start gap-3';
+        feedbackTitle.className = 'font-bold text-indigo-900 text-sm font-fun';
+        feedbackText.className = 'text-xs text-indigo-800 mt-1 leading-relaxed';
+      } else {
+        feedbackEmotion.textContent = '😊';
+        feedbackTitle.textContent = 'Bumi Sedang Sehat & Sejuk!';
+        feedbackText.textContent = 'Kadar polusi seimbang dengan pepohonan hijau. Efek rumah kaca alami bekerja sempurna menjaga suhu bumi tetap stabil di sekitar 25°C untuk kehidupan kita!';
+        dynamicFeedbackContainer.className = 'p-4 rounded-2xl bg-blue-50 border-2 border-blue-200 transition-colors duration-300 flex items-start gap-3';
+        feedbackTitle.className = 'font-bold text-blue-900 text-sm font-fun';
+        feedbackText.className = 'text-xs text-blue-800 mt-1 leading-relaxed';
+      }
+    }
+
+    sliderCo2.addEventListener('input', (e) => {
+      state.co2 = parseInt(e.target.value, 10);
+      playTone(280 + state.co2 * 3, 0.05, 'sine', 0.04);
+      updateUI();
+    });
+
+    sliderTrees.addEventListener('input', (e) => {
+      state.trees = parseInt(e.target.value, 10);
+      playTone(400 + state.trees * 2, 0.05, 'triangle', 0.04);
+      updateUI();
+    });
+
+    document.querySelectorAll('.preset-co2').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const val = parseInt(btn.getAttribute('data-val'), 10);
+        state.co2 = val;
+        sliderCo2.value = val;
+        playTone(440, 0.1, 'sine', 0.08);
+        updateUI();
+      });
+    });
+
+    document.querySelectorAll('.preset-trees').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const val = parseInt(btn.getAttribute('data-val'), 10);
+        state.trees = val;
+        sliderTrees.value = val;
+        playTone(520, 0.1, 'triangle', 0.08);
+        updateUI();
+      });
+    });
+
+    btnSunToggle.addEventListener('click', () => {
+      state.isDay = !state.isDay;
+      if (state.isDay) {
+        sunIcon.textContent = '☀️';
+        sunLabel.textContent = 'Waktu: Siang Hari';
+        btnSunToggle.className = 'py-2.5 px-3 rounded-2xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 border-2 border-amber-500/40 shadow-sm transition active:scale-95';
+        playTone(600, 0.15, 'sine', 0.08);
+      } else {
+        sunIcon.textContent = '🌙';
+        sunLabel.textContent = 'Waktu: Malam Hari';
+        btnSunToggle.className = 'py-2.5 px-3 rounded-2xl bg-indigo-900 hover:bg-indigo-800 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 border-2 border-indigo-700 shadow-sm transition active:scale-95';
+        playTone(320, 0.15, 'sine', 0.08);
+      }
+      updateUI();
+    });
+
+    btnRadiationToggle.addEventListener('click', () => {
+      state.isRadiationOn = !state.isRadiationOn;
+      if (state.isRadiationOn) {
+        radIcon.textContent = '✨';
+        radLabel.textContent = 'Sinar Panas: Aktif';
+        btnRadiationToggle.className = 'py-2.5 px-3 rounded-2xl bg-sky-100 hover:bg-sky-200 text-sky-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 border-2 border-sky-300 shadow-sm transition active:scale-95';
+        playTone(490, 0.1, 'triangle', 0.08);
+      } else {
+        radIcon.textContent = '🚫';
+        radLabel.textContent = 'Sinar Panas: Mati';
+        btnRadiationToggle.className = 'py-2.5 px-3 rounded-2xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 border-2 border-slate-300 shadow-sm transition active:scale-95';
+        playTone(240, 0.1, 'triangle', 0.08);
+      }
+      updateUI();
+    });
+
+    btnResetAll.addEventListener('click', () => {
+      state.co2 = 35;
+      state.trees = 60;
+      state.isDay = true;
+      state.isRadiationOn = true;
+      sliderCo2.value = 35;
+      sliderTrees.value = 60;
+      sunIcon.textContent = '☀️';
+      sunLabel.textContent = 'Waktu: Siang Hari';
+      btnSunToggle.className = 'py-2.5 px-3 rounded-2xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 border-2 border-amber-500/40 shadow-sm transition active:scale-95';
+      radIcon.textContent = '✨';
+      radLabel.textContent = 'Sinar Panas: Aktif';
+      btnRadiationToggle.className = 'py-2.5 px-3 rounded-2xl bg-sky-100 hover:bg-sky-200 text-sky-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 border-2 border-sky-300 shadow-sm transition active:scale-95';
+      playTone(440, 0.2, 'sine', 0.1);
+      updateUI();
+    });
+
+    btnTtsToggle.addEventListener('click', () => {
+      state.ttsEnabled = !state.ttsEnabled;
+      if (state.ttsEnabled) {
+        ttsIcon.textContent = '🔊';
+        ttsLabel.textContent = 'Suara Guru';
+        btnTtsToggle.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 text-xs sm:text-sm font-bold border border-amber-300 transition shadow-sm active:scale-95';
+        speakText('Suara guru aktif!');
+      } else {
+        ttsIcon.textContent = '🔇';
+        ttsLabel.textContent = 'Suara Mati';
+        btnTtsToggle.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 text-xs sm:text-sm font-bold border border-slate-300 transition shadow-sm active:scale-95';
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      }
+    });
+
+    btnSfxToggle.addEventListener('click', () => {
+      state.sfxEnabled = !state.sfxEnabled;
+      if (state.sfxEnabled) {
+        sfxIcon.textContent = '🎵';
+        btnSfxToggle.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-900 text-xs sm:text-sm font-bold border border-sky-300 transition shadow-sm active:scale-95';
+        playTone(660, 0.15, 'sine', 0.1);
+      } else {
+        sfxIcon.textContent = '🔈';
+        btnSfxToggle.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 text-xs sm:text-sm font-bold border border-slate-300 transition shadow-sm active:scale-95';
+      }
+    });
+
+    btnSpeakFeedback.addEventListener('click', () => {
+      const fullText = `${feedbackTitle.textContent}. ${feedbackText.textContent}`;
+      speakText(fullText);
+    });
+
+    btnHelpModal.addEventListener('click', () => modalHelp.classList.remove('hidden'));
+    btnCloseHelp.addEventListener('click', () => modalHelp.classList.add('hidden'));
+    btnUnderstandHelp.addEventListener('click', () => modalHelp.classList.add('hidden'));
+    modalHelp.addEventListener('click', (e) => {
+      if (e.target === modalHelp) modalHelp.classList.add('hidden');
+    });
+
+    btnDownloadHtml.addEventListener('click', () => {
+      playSuccessChime();
+      const currentHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      const blob = new Blob([currentHtml], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'index.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    // --- KUIS REFLEKSI IPAS BAB 4 ---
+    const quizQuestions = [
+      {
+        id: 1,
+        question: "1. Apa yang terjadi jika gas rumah kaca (seperti CO₂) di atmosfer bertambah terlalu banyak?",
+        options: [
+          { text: "Bumi menjadi sangat dingin dan membeku", correct: false },
+          { text: "Panas terperangkap dan suhu bumi memanas", correct: true },
+          { text: "Jumlah air di bumi hilang seketika", correct: false }
+        ],
+        explanation: "Gas rumah kaca yang berlebih seperti selimut yang terlalu tebal. Panas matahari tidak bisa keluar dan menyebabkan pemanasan global!"
+      },
+      {
+        id: 2,
+        question: "2. Mengapa menanam banyak pohon dapat membantu mendinginkan bumi?",
+        options: [
+          { text: "Pohon dapat menyerap gas karbon dioksida (CO₂)", correct: true },
+          { text: "Pohon menghalangi semua sinar matahari dari luar angkasa", correct: false },
+          { text: "Pohon membuat bumi berputar lebih cepat", correct: false }
+        ],
+        explanation: "Pohon menyerap CO₂ saat berfotosintesis dan mengeluarkan oksigen bersih, sehingga selimut gas rumah kaca tidak terlalu tebal."
+      },
+      {
+        id: 3,
+        question: "3. Apa dampak buruk dari naiknya suhu bumi bagi kutub dan lautan?",
+        options: [
+          { text: "Es di kutub makin tebal dan membeku", correct: false },
+          { text: "Bongkahan es kutub mencair dan air laut naik", correct: true },
+          { text: "Lautan berubah menjadi es batu besar", correct: false }
+        ],
+        explanation: "Saat bumi semakin hangat (>30°C), es kutub mencair, menyebabkan permukaan laut naik dan bisa membanjiri pulau atau pesisir pantai."
+      }
+    ];
+
+    const quizAnswers = {};
+    const quizContainer = document.getElementById('quizContainer');
+    const quizScoreBadge = document.getElementById('quizScoreBadge');
+    const btnResetQuiz = document.getElementById('btnResetQuiz');
+
+    function renderQuiz() {
+      quizContainer.innerHTML = '';
+      quizQuestions.forEach((q, qIndex) => {
+        const card = document.createElement('div');
+        card.className = 'bg-slate-50 p-3.5 rounded-2xl border border-slate-200 flex flex-col gap-2';
+
+        const qTitle = document.createElement('div');
+        qTitle.className = 'font-bold text-slate-800 text-xs sm:text-sm font-fun';
+        qTitle.textContent = q.question;
+        card.appendChild(qTitle);
+
+        const optsContainer = document.createElement('div');
+        optsContainer.className = 'grid grid-cols-1 gap-1.5';
+
+        const userAnswer = quizAnswers[q.id];
+
+        q.options.forEach((opt, oIndex) => {
+          const btn = document.createElement('button');
+          btn.className = 'w-full text-left px-3 py-2 rounded-xl text-xs font-semibold border transition text-slate-700 ';
+          
+          if (userAnswer === undefined) {
+            btn.className += 'bg-white hover:bg-sky-50 border-slate-200 hover:border-sky-300';
+          } else {
+            btn.disabled = true;
+            if (opt.correct) {
+              btn.className += 'bg-emerald-100 border-emerald-400 text-emerald-900 font-bold';
+            } else if (userAnswer === oIndex && !opt.correct) {
+              btn.className += 'bg-red-100 border-red-400 text-red-900 line-through';
+            } else {
+              btn.className += 'bg-slate-100 border-slate-200 text-slate-400 opacity-60';
+            }
+          }
+
+          btn.textContent = `${String.fromCharCode(65 + oIndex)}. ${opt.text}`;
+
+          btn.addEventListener('click', () => {
+            quizAnswers[q.id] = oIndex;
+            if (opt.correct) {
+              playSuccessChime();
+            } else {
+              playWrongBuzz();
+            }
+            renderQuiz();
+            calculateScore();
+          });
+
+          optsContainer.appendChild(btn);
+        });
+
+        card.appendChild(optsContainer);
+
+        if (userAnswer !== undefined) {
+          const expBox = document.createElement('div');
+          const isCorrect = q.options[userAnswer].correct;
+          expBox.className = `p-2 rounded-xl text-[11px] font-medium mt-1 ${isCorrect ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-red-50 text-red-800 border border-red-200'}`;
+          expBox.innerHTML = `<b>${isCorrect ? '✨ Tepat Sekali!' : '💡 Kurang Tepat:'}</b> ${q.explanation}`;
+          card.appendChild(expBox);
+        }
+
+        quizContainer.appendChild(card);
+      });
+    }
+
+    function calculateScore() {
+      let score = 0;
+      quizQuestions.forEach(q => {
+        if (quizAnswers[q.id] !== undefined && q.options[quizAnswers[q.id]].correct) {
+          score += 1;
+        }
+      });
+      quizScoreBadge.textContent = `Skor: ${score} / 3 Bintang ⭐`;
+      if (score === 3) {
+        quizScoreBadge.className = 'text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900 animate-bounce';
+      } else {
+        quizScoreBadge.className = 'text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700';
+      }
+    }
+
+    btnResetQuiz.addEventListener('click', () => {
+      for (const k in quizAnswers) delete quizAnswers[k];
+      renderQuiz();
+      calculateScore();
+      playTone(400, 0.1, 'sine', 0.08);
+    });
+
+    renderQuiz();
+
+    // --- CANVAS 2D ANIMATION ENGINE ---
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const sunRays = [];
+    const heatParticles = [];
+    const co2Molecules = [];
+    const clouds = [
+      { x: 50, y: 70, speed: 0.25, size: 28 },
+      { x: 220, y: 50, speed: 0.18, size: 22 },
+      { x: 380, y: 80, speed: 0.22, size: 34 }
+    ];
+
+    let width = 640;
+    let height = 480;
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      width = rect.width;
+      height = rect.height;
+      if (width === 0 || height === 0) return;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.resetTransform ? ctx.resetTransform() : ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    setTimeout(resizeCanvas, 50);
+
+    function initCo2Molecules() {
+      co2Molecules.length = 0;
+      const count = 55;
+      for (let i = 0; i < count; i++) {
+        co2Molecules.push({
+          x: Math.random() * width,
+          y: 70 + Math.random() * 140,
+          vx: (Math.random() - 0.5) * 0.4,
+          vy: (Math.random() - 0.5) * 0.2,
+          radius: 6,
+          pulse: Math.random() * Math.PI
+        });
+      }
+    }
+    initCo2Molecules();
+
+    function spawnSunRay() {
+      if (!state.isRadiationOn || !state.isDay) return;
+      if (sunRays.length > 25) return;
+
+      const startX = 45 + Math.random() * 30;
+      const startY = 45 + Math.random() * 30;
+      const targetX = 80 + Math.random() * (width - 160);
+      const targetY = height * 0.72 + Math.sin(targetX / width * Math.PI) * 20;
+
+      const angle = Math.atan2(targetY - startY, targetX - startX);
+      const speed = 2.4 + Math.random() * 0.8;
+
+      sunRays.push({
+        x: startX,
+        y: startY,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        targetY: targetY,
+        length: 12,
+        life: 0
+      });
+    }
+
+    function spawnHeatParticle(x, y) {
+      if (heatParticles.length > 35) return;
+      const angle = -Math.PI / 2 + (Math.random() - 0.5) * 0.9;
+      const speed = 1.6 + Math.random() * 0.6;
+      heatParticles.push({
+        x: x,
+        y: y - 5,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        trapped: false,
+        life: 0,
+        maxLife: 150
+      });
+    }
+
+    let frameCount = 0;
+
+    function render() {
+      frameCount++;
+
+      if (width <= 0 || height <= 0) {
+        requestAnimationFrame(render);
+        return;
+      }
+
+      if (state.isDay) {
+        const hazeFactor = Math.min(1, state.co2 / 100);
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, height);
+        if (hazeFactor < 0.4) {
+          skyGrad.addColorStop(0, '#0284c7');
+          skyGrad.addColorStop(0.5, '#38bdf8');
+          skyGrad.addColorStop(1, '#bae6fd');
+        } else if (hazeFactor < 0.7) {
+          skyGrad.addColorStop(0, '#0369a1');
+          skyGrad.addColorStop(0.5, '#7dd3fc');
+          skyGrad.addColorStop(1, '#fef08a');
+        } else {
+          skyGrad.addColorStop(0, '#334155');
+          skyGrad.addColorStop(0.5, '#64748b');
+          skyGrad.addColorStop(1, '#fed7aa');
+        }
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, width, height);
+
+        const sunX = 60;
+        const sunY = 55;
+        const sunGlow = ctx.createRadialGradient(sunX, sunY, 10, sunX, sunY, 65);
+        sunGlow.addColorStop(0, 'rgba(254, 240, 138, 0.9)');
+        sunGlow.addColorStop(0.5, 'rgba(251, 191, 36, 0.4)');
+        sunGlow.addColorStop(1, 'rgba(245, 158, 11, 0)');
+        ctx.fillStyle = sunGlow;
+        ctx.beginPath();
+        ctx.arc(sunX, sunY, 65, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.arc(sunX, sunY, 24, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath();
+        ctx.arc(sunX, sunY, 18, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(sunX, sunY);
+        ctx.rotate(frameCount * 0.008);
+        ctx.strokeStyle = 'rgba(251, 191, 36, 0.6)';
+        ctx.lineWidth = 2.5;
+        for (let i = 0; i < 8; i++) {
+          ctx.rotate(Math.PI / 4);
+          ctx.beginPath();
+          ctx.moveTo(28, 0);
+          ctx.lineTo(38, 0);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+      } else {
+        const nightGrad = ctx.createLinearGradient(0, 0, 0, height);
+        nightGrad.addColorStop(0, '#030712');
+        nightGrad.addColorStop(0.6, '#0f172a');
+        nightGrad.addColorStop(1, '#1e1b4b');
+        ctx.fillStyle = nightGrad;
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.fillStyle = '#ffffff';
+        for (let i = 0; i < 35; i++) {
+          const starX = ((i * 73) % width);
+          const starY = ((i * 47) % (height * 0.6));
+          const twinkle = Math.sin(frameCount * 0.05 + i) * 0.5 + 0.5;
+          ctx.globalAlpha = 0.3 + twinkle * 0.7;
+          ctx.beginPath();
+          ctx.arc(starX, starY, (i % 3 === 0) ? 1.5 : 1, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1.0;
+
+        const moonX = 65;
+        const moonY = 55;
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath();
+        ctx.arc(moonX, moonY, 20, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(moonX + 7, moonY - 4, 17, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = state.isDay ? 'rgba(255, 255, 255, 0.85)' : 'rgba(148, 163, 184, 0.4)';
+      clouds.forEach(cloud => {
+        cloud.x += cloud.speed;
+        if (cloud.x > width + 60) cloud.x = -60;
+        ctx.beginPath();
+        ctx.arc(cloud.x, cloud.y, cloud.size, 0, Math.PI * 2);
+        ctx.arc(cloud.x + cloud.size * 0.7, cloud.y - cloud.size * 0.2, cloud.size * 0.8, 0, Math.PI * 2);
+        ctx.arc(cloud.x - cloud.size * 0.7, cloud.y + cloud.size * 0.1, cloud.size * 0.7, 0, Math.PI * 2);
+        ctx.arc(cloud.x + cloud.size * 1.3, cloud.y + cloud.size * 0.2, cloud.size * 0.6, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      const earthCenterX = width / 2;
+      const earthCenterY = height * 1.55;
+      const earthRadius = height * 0.95;
+      const atmosphereRadius = earthRadius + 110;
+
+      ctx.save();
+      const atmoGrad = ctx.createRadialGradient(
+        earthCenterX, earthCenterY, earthRadius,
+        earthCenterX, earthCenterY, atmosphereRadius
+      );
+      if (state.co2 > 65) {
+        atmoGrad.addColorStop(0, 'rgba(251, 146, 60, 0.35)');
+        atmoGrad.addColorStop(0.7, 'rgba(239, 68, 68, 0.2)');
+        atmoGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+      } else {
+        atmoGrad.addColorStop(0, 'rgba(56, 189, 248, 0.35)');
+        atmoGrad.addColorStop(0.7, 'rgba(56, 189, 248, 0.15)');
+        atmoGrad.addColorStop(1, 'rgba(56, 189, 248, 0)');
+      }
+      ctx.fillStyle = atmoGrad;
+      ctx.beginPath();
+      ctx.arc(earthCenterX, earthCenterY, atmosphereRadius, Math.PI, 0, false);
+      ctx.arc(earthCenterX, earthCenterY, earthRadius, 0, Math.PI, true);
+      ctx.fill();
+
+      ctx.strokeStyle = state.co2 > 65 ? 'rgba(248, 113, 113, 0.5)' : 'rgba(56, 189, 248, 0.6)';
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([6, 6]);
+      ctx.beginPath();
+      ctx.arc(earthCenterX, earthCenterY, atmosphereRadius - 10, Math.PI * 1.05, Math.PI * 1.95, false);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+
+      const activeCo2Count = Math.max(4, Math.round(state.co2 * 0.5));
+      for (let i = 0; i < activeCo2Count; i++) {
+        const mol = co2Molecules[i];
+        if (!mol) continue;
+
+        mol.x += mol.vx;
+        mol.y += mol.vy;
+        if (mol.x < 30) mol.vx = Math.abs(mol.vx);
+        if (mol.x > width - 30) mol.vx = -Math.abs(mol.vx);
+        if (mol.y < 80) mol.vy = Math.abs(mol.vy);
+        if (mol.y > height * 0.68) mol.vy = -Math.abs(mol.vy);
+
+        mol.pulse += 0.05;
+        const pScale = 1 + Math.sin(mol.pulse) * 0.08;
+
+        ctx.save();
+        ctx.translate(mol.x, mol.y);
+        ctx.scale(pScale, pScale);
+
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(-7, 0, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(7, 0, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#334155';
+        ctx.beginPath();
+        ctx.arc(0, 0, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 6px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('C', 0, 0);
+
+        ctx.restore();
+      }
+
+      if (frameCount % 6 === 0) spawnSunRay();
+
+      for (let i = sunRays.length - 1; i >= 0; i--) {
+        const ray = sunRays[i];
+        ray.x += ray.vx;
+        ray.y += ray.vy;
+        ray.life++;
+
+        ctx.save();
+        ctx.strokeStyle = '#fef08a';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(ray.x, ray.y);
+        ctx.lineTo(ray.x - ray.vx * 3.5, ray.y - ray.vy * 3.5);
+        ctx.stroke();
+
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        ctx.arc(ray.x, ray.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        if (ray.y >= ray.targetY || ray.life > 160) {
+          spawnHeatParticle(ray.x, ray.targetY);
+          sunRays.splice(i, 1);
+        }
+      }
+
+      for (let i = heatParticles.length - 1; i >= 0; i--) {
+        const hp = heatParticles[i];
+        hp.x += hp.vx;
+        hp.y += hp.vy;
+        hp.life++;
+
+        if (!hp.trapped && hp.y < height * 0.45) {
+          const bounceChance = state.co2 / 110;
+          if (Math.random() < bounceChance) {
+            hp.trapped = true;
+            hp.vy = Math.abs(hp.vy) * 0.95;
+            hp.vx += (Math.random() - 0.5) * 1.2;
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.beginPath();
+            ctx.arc(hp.x, hp.y, 8, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        ctx.save();
+        ctx.strokeStyle = hp.trapped ? '#dc2626' : '#ea580c';
+        ctx.lineWidth = hp.trapped ? 3 : 2;
+        ctx.beginPath();
+        ctx.moveTo(hp.x, hp.y);
+        ctx.lineTo(hp.x - hp.vx * 4, hp.y - hp.vy * 4);
+        ctx.stroke();
+
+        ctx.fillStyle = hp.trapped ? '#b91c1c' : '#f97316';
+        ctx.beginPath();
+        ctx.arc(hp.x, hp.y, hp.trapped ? 3.5 : 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        if (hp.life > hp.maxLife || hp.y < 20 || hp.y > height * 0.85) {
+          heatParticles.splice(i, 1);
+        }
+      }
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(earthCenterX, earthCenterY, earthRadius, Math.PI, 0, false);
+      ctx.closePath();
+
+      const oceanGrad = ctx.createRadialGradient(
+        earthCenterX, earthCenterY - earthRadius * 0.2, earthRadius * 0.5,
+        earthCenterX, earthCenterY, earthRadius
+      );
+      oceanGrad.addColorStop(0, '#0284c7');
+      oceanGrad.addColorStop(1, '#0369a1');
+      ctx.fillStyle = oceanGrad;
+      ctx.fill();
+
+      const waterRise = state.seaLevelRise;
+
+      ctx.beginPath();
+      const landY = height * 0.65 + waterRise * 0.4;
+      ctx.moveTo(width * 0.18, height * 0.85);
+      ctx.bezierCurveTo(width * 0.22, landY, width * 0.35, landY - 15, width * 0.5, landY);
+      ctx.bezierCurveTo(width * 0.65, landY + 10, width * 0.78, landY - 10, width * 0.84, height * 0.85);
+      ctx.lineTo(earthCenterX + earthRadius, earthCenterY);
+      ctx.lineTo(earthCenterX - earthRadius, earthCenterY);
+      ctx.closePath();
+
+      const landGrad = ctx.createLinearGradient(0, landY - 20, 0, height);
+      if (state.temp > 35) {
+        landGrad.addColorStop(0, '#a16207');
+        landGrad.addColorStop(1, '#713f12');
+      } else {
+        landGrad.addColorStop(0, '#22c55e');
+        landGrad.addColorStop(1, '#15803d');
+      }
+      ctx.fillStyle = landGrad;
+      ctx.fill();
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      const waveOffset = Math.sin(frameCount * 0.04) * 3;
+      ctx.arc(width * 0.32, landY + 12 + waveOffset, 20, 0, Math.PI * 0.6);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(width * 0.68, landY + 8 - waveOffset, 22, 0.4, Math.PI * 0.9);
+      ctx.stroke();
+
+      const iceScale = Math.max(0.12, 1.0 - state.iceMeltPercent * 0.85);
+
+      // Kutub Kiri (Utara)
+      ctx.save();
+      const iceLeftX = width * 0.08;
+      const iceLeftY = height * 0.74 + waterRise * 0.3;
+      ctx.translate(iceLeftX, iceLeftY);
+      ctx.scale(iceScale, iceScale);
+
+      ctx.fillStyle = '#f0fdfa';
+      ctx.strokeStyle = '#67e8f9';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-45, 25);
+      ctx.lineTo(-30, -18);
+      ctx.lineTo(-5, -35);
+      ctx.lineTo(25, -20);
+      ctx.lineTo(45, 25);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#cffafe';
+      ctx.beginPath();
+      ctx.moveTo(-15, -12);
+      ctx.lineTo(0, -28);
+      ctx.lineTo(15, -12);
+      ctx.closePath();
+      ctx.fill();
+
+      if (iceScale > 0.4) {
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.ellipse(5, -32, 4, 7, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.ellipse(5, -31, 2.5, 4.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        ctx.arc(5, -38, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+
+      // Kutub Kanan (Selatan)
+      ctx.save();
+      const iceRightX = width * 0.92;
+      const iceRightY = height * 0.74 + waterRise * 0.3;
+      ctx.translate(iceRightX, iceRightY);
+      ctx.scale(iceScale, iceScale);
+
+      ctx.fillStyle = '#f0fdfa';
+      ctx.strokeStyle = '#67e8f9';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-40, 25);
+      ctx.lineTo(-20, -22);
+      ctx.lineTo(8, -32);
+      ctx.lineTo(35, -15);
+      ctx.lineTo(45, 25);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      if (iceScale > 0.4) {
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(-8, -26, 6, 0, Math.PI * 2);
+        ctx.arc(-13, -29, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+
+      if (state.iceMeltPercent > 0.15) {
+        ctx.fillStyle = '#38bdf8';
+        const dripY = (frameCount * 2) % 35;
+        ctx.beginPath();
+        ctx.arc(width * 0.12, height * 0.76 + dripY, 2.5, 0, Math.PI * 2);
+        ctx.arc(width * 0.88, height * 0.76 + dripY, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      const treeCount = Math.max(3, Math.round(state.trees * 0.45));
+      const treeSpacing = (width * 0.5) / (treeCount + 1);
+
+      for (let i = 1; i <= treeCount; i++) {
+        const tx = width * 0.25 + i * treeSpacing + Math.sin(i * 1.5) * 5;
+        const ty = height * 0.67 + Math.sin(tx / width * Math.PI) * 12 + waterRise * 0.2;
+        const treeSize = 14 + (i % 3) * 3;
+
+        ctx.fillStyle = '#78350f';
+        ctx.fillRect(tx - 2, ty, 4, 10);
+
+        ctx.fillStyle = state.temp > 35 ? '#854d0e' : '#15803d';
+        ctx.beginPath();
+        ctx.arc(tx, ty - 2, treeSize * 0.7, 0, Math.PI * 2);
+        ctx.arc(tx - 4, ty - 8, treeSize * 0.55, 0, Math.PI * 2);
+        ctx.arc(tx + 4, ty - 8, treeSize * 0.55, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = state.temp > 35 ? '#ca8a04' : '#22c55e';
+        ctx.beginPath();
+        ctx.arc(tx, ty - 9, treeSize * 0.45, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      const faceX = width * 0.5;
+      const faceY = height * 0.78 + waterRise * 0.3;
+
+      ctx.save();
+      ctx.translate(faceX, faceY);
+
+      if (state.temp <= 26.5) {
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(-14, -6, 6, Math.PI * 1.1, Math.PI * 1.9);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(14, -6, 6, Math.PI * 1.1, Math.PI * 1.9);
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(244, 114, 182, 0.6)';
+        ctx.beginPath();
+        ctx.arc(-22, -2, 5, 0, Math.PI * 2);
+        ctx.arc(22, -2, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(0, 0, 12, 0.1, Math.PI - 0.1);
+        ctx.stroke();
+
+      } else if (state.temp <= 31.0) {
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(-14, -6, 3.5, 0, Math.PI * 2);
+        ctx.arc(14, -6, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#38bdf8';
+        ctx.beginPath();
+        ctx.arc(25, -16, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(-10, 4);
+        ctx.lineTo(0, 7);
+        ctx.lineTo(10, 4);
+        ctx.stroke();
+
+      } else if (state.temp <= 36.5) {
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.2)';
+        ctx.beginPath();
+        ctx.arc(0, 0, 36, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(-18, -8); ctx.lineTo(-10, -4);
+        ctx.moveTo(-18, -4); ctx.lineTo(-10, -8);
+        ctx.moveTo(10, -8); ctx.lineTo(18, -4);
+        ctx.moveTo(10, -4); ctx.lineTo(18, -8);
+        ctx.stroke();
+
+        ctx.fillStyle = '#0284c7';
+        ctx.beginPath();
+        ctx.arc(24, -14, 4.5, 0, Math.PI * 2);
+        ctx.arc(-22, -10, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#991b1b';
+        ctx.beginPath();
+        ctx.ellipse(0, 7, 9, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+      } else {
+        ctx.fillStyle = 'rgba(220, 38, 38, 0.35)';
+        ctx.beginPath();
+        ctx.arc(0, 0, 38, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#cffafe';
+        ctx.strokeStyle = '#0891b2';
+        ctx.lineWidth = 2;
+        ctx.fillRect(-22, -26, 44, 10);
+        ctx.strokeRect(-22, -26, 44, 10);
+
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(-14, -6, 3, 0, Math.PI * 2);
+        ctx.arc(14, -6, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#38bdf8';
+        ctx.beginPath();
+        ctx.arc(-14, 2, 3, 0, Math.PI * 2);
+        ctx.arc(14, 2, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(0, 14, 10, Math.PI * 1.1, Math.PI * 1.9);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+      ctx.restore();
+
+      requestAnimationFrame(render);
+    }
+
+    updateUI();
+    requestAnimationFrame(render);
+  </script>
+</body>
+</html>
